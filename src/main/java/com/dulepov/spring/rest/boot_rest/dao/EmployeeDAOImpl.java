@@ -13,7 +13,7 @@ import java.util.List;
 @Repository
 public class EmployeeDAOImpl implements EmployeeDAO{
 
-    //заменяем sessionFactory на EntityManager
+    //используем дефолтный бин EntityManager [сами мы его не описывали, он системный](вместо sessionFactory, чтобы соответствовать независимому JPA)
     @Autowired
     private EntityManager entityManager;
 
@@ -39,17 +39,17 @@ public class EmployeeDAOImpl implements EmployeeDAO{
 
         Session session=entityManager.unwrap(Session.class);
 
-//        if (emp.getId==0){
-//            session.save(emp);	//CREATE
-//        } else {
-//            session.update(emp)	//UPDATE
-//                    [тут как-то по-другому апдейтится, смотри hibernate]
-//        }
-
-        //блок if-else лучше оформить так:
-        session.saveOrUpdate(emp);
+        //merge является родителем для метода saveOrUpdate у Hibernate
+        //используется при ошибке NonUniqueObjectException у saveOrUpdate
+        //NonUniqueObjectException возникла при переходе с Hibernate на JPA(на entityManager)
+//        session.merge(emp);
 
 
+        if (emp.getId()==0){    //если в json не будет передан id, то при десериализации он будет =0
+            session.save(emp);	//CREATE
+        } else {
+            session.merge(emp);	//UPDATE and PARTIAL UPDATE
+        }
     }
 
     //UPDATE

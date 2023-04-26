@@ -1,7 +1,7 @@
 package com.dulepov.spring.rest.boot_rest.entity;
 
 
-import com.dulepov.spring.rest.validation.CheckEmail;
+import com.dulepov.spring.rest.boot_rest.validation.CheckEmail;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
@@ -38,6 +38,18 @@ public class Employee {
     @Pattern(regexp="\\d{3}-\\d{2}-\\d{2}", message="please use pattern XXX-XX-XX")
     private String phoneNumber;
 
+    @Override
+    public String toString() {
+        return "Employee{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+                ", department='" + department + '\'' +
+                ", salary=" + salary +
+                ", email='" + email + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                '}';
+    }
 
     public Employee() {
     }
