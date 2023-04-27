@@ -2,8 +2,7 @@ package com.dulepov.spring.rest.boot_rest.dao;
 
 import com.dulepov.spring.rest.boot_rest.entity.Employee;
 import jakarta.persistence.EntityManager;
-import org.hibernate.Session;
-import org.hibernate.query.Query;
+import jakarta.persistence.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,11 +23,14 @@ public class EmployeeDAOImpl implements EmployeeDAO{
     @Transactional
     public List<Employee> getAllEmployees(){
 
-        //получаем сессию из EntityManager
-        Session session=entityManager.unwrap(Session.class);
+//        //получаем сессию из EntityManager (by JPA)
+//        Session session=entityManager.unwrap(Session.class);
 
-        //получаем информацию из базы
-        List<Employee> allEmployees=session.createQuery("from Employee",  Employee.class).getResultList();
+        //получаем информацию из базы (by JPA)
+        List<Employee> allEmployees=entityManager.createQuery("from Employee",  Employee.class).getResultList();
+
+//        //получаем информацию из базы (by Hibernate)
+//        List<Employee> allEmployees=session.createQuery("from Employee",  Employee.class).getResultList();
 
         return allEmployees;
     }
@@ -37,29 +39,29 @@ public class EmployeeDAOImpl implements EmployeeDAO{
     @Override
     public void saveEmployee(Employee emp){
 
-        Session session=entityManager.unwrap(Session.class);
+//        сохраняем или апдейтим (by Hibernate)-разделяет по id=0
+//        session.saveOrUpdate(emp);
 
+        //сохраняем или апдейтим (by JPA)-разделяет по id=0
         //merge является родителем для метода saveOrUpdate у Hibernate
         //используется при ошибке NonUniqueObjectException у saveOrUpdate
         //NonUniqueObjectException возникла при переходе с Hibernate на JPA(на entityManager)
-//        session.merge(emp);
+        Employee newEmp=entityManager.merge(emp);
 
+        //emp.id при create = 0, дозаполним его присвоенным id для вывода json
+        emp.setId(newEmp.getId());
 
-        if (emp.getId()==0){    //если в json не будет передан id, то при десериализации он будет =0
-            session.save(emp);	//CREATE
-        } else {
-            session.merge(emp);	//UPDATE and PARTIAL UPDATE
-        }
     }
 
-    //UPDATE
+    //GET ONE
     @Override
     public Employee getCurrentEmployee(int id){
 
-        Session session=entityManager.unwrap(Session.class);
+        //получаем обьект (by JPA)
+        Employee emp=entityManager.find(Employee.class, id);
 
-        //получаем обьект
-        Employee emp=session.get(Employee.class, id);
+        //получаем обьект (by Hibernate)
+//        Employee emp=session.get(Employee.class, id);
 
         return emp;
     }
@@ -68,10 +70,14 @@ public class EmployeeDAOImpl implements EmployeeDAO{
     @Override
     public void deleteEmployee(int id){
 
-        Session session=entityManager.unwrap(Session.class);
 
-        //удаляем обьект
-        Query<Employee> query=session.createQuery("delete from Employee where id=:employeeId");
+//        //удаляем обьект (by Hibernate)
+//        Query<Employee> query=session.createQuery("delete from Employee where id=:employeeId");
+//        query.setParameter("employeeId", id);
+//        query.executeUpdate();
+
+        //удаляем обьект (by JPA)
+        Query query= entityManager.createQuery("delete from Employee where id=:employeeId");
         query.setParameter("employeeId", id);
         query.executeUpdate();
     }
