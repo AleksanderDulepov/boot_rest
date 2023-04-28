@@ -16,14 +16,12 @@ public class EmployeeDAOImpl implements EmployeeDAO{
     @Autowired
     private EntityManager entityManager;
 
-
-
     //READ
     @Override
     @Transactional
     public List<Employee> getAllEmployees(){
 
-//        //получаем сессию из EntityManager (by JPA)
+//        //получаем сессию из EntityManager
 //        Session session=entityManager.unwrap(Session.class);
 
         //получаем информацию из базы (by JPA)
